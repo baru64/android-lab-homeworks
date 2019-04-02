@@ -1,31 +1,65 @@
 package com.example.homework1_a12;
 
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    public int currentContact = 0;
+    public String currentContact = "John Smith";
     public int currentSoundId = 0;
     public static final String SOUND_ID = "sound id";
     public static final String CONTACT_NAME = "contact id";
     public static final int CONTACT_REQUEST = 1;
     public static final int SOUND_REQUEST = 2;
 
+    private static int[] contactImages = {  R.drawable.pic1,
+                                            R.drawable.pic2,
+                                            R.drawable.pic3,
+                                            R.drawable.pic4,
+                                            R.drawable.pic5 };
+
+    private MediaPlayer buttonPlayer;
+    static public Uri[] sounds;
+    boolean isPlaying = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        ImageView contactImage = (ImageView) findViewById(R.id.contactImage);
-//        contactImage.setImageDrawable();
+        sounds = new Uri[5];
+        sounds[0]  =  Uri.parse("android.resource://"  +  getPackageName()  +  "/"  + R.raw.mario);
+        sounds[1]  =  Uri.parse("android.resource://"  +  getPackageName()  +  "/"  + R.raw.ring01);
+        sounds[2]  =  Uri.parse("android.resource://"  + getPackageName()  +  "/"  + R.raw.ring02);
+        sounds[3]  =  Uri.parse("android.resource://"  +  getPackageName()  +  "/"  + R.raw.ring03);
+        sounds[4]  =  Uri.parse("android.resource://"  +  getPackageName()  +  "/"  + R.raw.ring04);
 
-        Button contactButton = (Button) findViewById(R.id.contactButton);
-        Button soundButton = (Button) findViewById(R.id.soundButton);
+        buttonPlayer = new MediaPlayer();
+        buttonPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        buttonPlayer.reset();
+        try {
+            buttonPlayer.setDataSource(getApplicationContext(),sounds[currentSoundId]);
+            buttonPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Button contactButton = findViewById(R.id.contactButton);
+        Button soundButton = findViewById(R.id.soundButton);
+        FloatingActionButton playButton = findViewById(R.id.playButton);
+        ImageView contactImage = findViewById(R.id.contactImage);
+        contactImage.setImageResource(contactImages[(int)(4 * Math.random())]);
 
         contactButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,5 +78,55 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(soundPick, SOUND_REQUEST);
             }
         });
+
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isPlaying) {
+                    buttonPlayer.start();
+                    isPlaying = true;
+                }
+                else {
+                    buttonPlayer.pause();
+                    isPlaying = false;
+                }
+            }
+        });
+
+        buttonPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                isPlaying = false;
+                mp.stop();
+                try {
+                    mp.prepare();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+    }
+
+    @Override
+    protected void onActivityResult(int  requestCode,  int  resultCode,  Intent data) {
+        if(resultCode == RESULT_OK) {
+            if(requestCode == CONTACT_REQUEST) {
+                currentContact = data.getStringExtra(CONTACT_NAME);
+                TextView contactText = findViewById(R.id.textView);
+                contactText.setText(currentContact);
+            } else if(requestCode == SOUND_REQUEST) {
+                currentSoundId = data.getIntExtra(SOUND_ID, 0);
+                buttonPlayer.reset();
+                try {
+                    buttonPlayer.setDataSource(getApplicationContext(),sounds[currentSoundId]);
+                    buttonPlayer.prepare();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        ImageView contactImage = (ImageView) findViewById(R.id.contactImage);
+        contactImage.setImageResource(contactImages[(int)(4 * Math.random())]);
     }
 }
