@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">homework1-A12</string>
+    <string name="sound1">Sound 1</string>
+    <string name="sound2">Sound 2</string>
+    <string name="sound3">Sound 3</string>
+    <string name="sound4">Sound 4</string>
+    <string name="sound5">Sound 5</string>
+    <array name="contacts">
+        <item>John Smith</item>
+        <item>That Guy</item>
+        <item>Lee Xiaolong</item>
+        <item>Linus Torvalds</item>
+        <item>Maja K</item>
+        <item>Dziadek Stefan</item>
+    </array>
 </resources>
