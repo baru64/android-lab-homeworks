@@ -5,6 +5,9 @@
     <string name="sound3">Sound 3</string>
     <string name="sound4">Sound 4</string>
     <string name="sound5">Sound 5</string>
+    <string name="change_contact">Change contact</string>
+    <string name="change_sound">Change sound</string>
+    <string name="avatar">Avatar</string>
     <array name="contacts">
         <item>John Smith</item>
         <item>That Guy</item>

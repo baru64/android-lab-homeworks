@@ -29,6 +29,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:text="@android:string/ok"
+        android:onClick="setContactClick"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinner" />
@@ -41,6 +42,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="@android:string/cancel"
+        android:onClick="cancelClick"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinner" />

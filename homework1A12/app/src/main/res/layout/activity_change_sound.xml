@@ -27,6 +27,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:text="@string/sound1"
+            android:onClick="onRadioButtonClicked"
             app:layout_constraintBottom_toTopOf="@+id/radioGroup"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -40,6 +41,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/sound2"
+            android:onClick="onRadioButtonClicked"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/radioButton" />
@@ -52,6 +54,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/sound3"
+            android:onClick="onRadioButtonClicked"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/radioButton2" />
@@ -64,6 +67,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/sound4"
+            android:onClick="onRadioButtonClicked"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/radioButton3" />
@@ -76,6 +80,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/sound5"
+            android:onClick="onRadioButtonClicked"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/radioButton4" />
@@ -89,6 +94,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
         android:text="@android:string/ok"
+        android:onClick="setSoundClick"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.195"
@@ -102,6 +108,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="20dp"
         android:text="@android:string/cancel"
+        android:onClick="cancelClick"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.804"
