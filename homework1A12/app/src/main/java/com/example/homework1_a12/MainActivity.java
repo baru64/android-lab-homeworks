@@ -47,13 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
         buttonPlayer = new MediaPlayer();
         buttonPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        buttonPlayer.reset();
-        try {
-            buttonPlayer.setDataSource(getApplicationContext(),sounds[currentSoundId]);
-            buttonPlayer.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         Button contactButton = findViewById(R.id.contactButton);
         Button soundButton = findViewById(R.id.soundButton);
@@ -83,11 +76,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!isPlaying) {
-                    buttonPlayer.start();
                     isPlaying = true;
-                }
-                else {
-                    buttonPlayer.pause();
+                    buttonPlayer.reset();
+                    try {
+                        buttonPlayer.setDataSource(getApplicationContext(), sounds[currentSoundId]);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    buttonPlayer.prepareAsync();
+                } else {
+                    buttonPlayer.reset();
                     isPlaying = false;
                 }
             }
@@ -97,15 +95,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 isPlaying = false;
-                mp.stop();
-                try {
-                    mp.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         });
 
+        buttonPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.start();
+            }
+        });
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        buttonPlayer.pause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
     @Override
@@ -117,13 +133,6 @@ public class MainActivity extends AppCompatActivity {
                 contactText.setText(currentContact);
             } else if(requestCode == SOUND_REQUEST) {
                 currentSoundId = data.getIntExtra(SOUND_ID, 0);
-                buttonPlayer.reset();
-                try {
-                    buttonPlayer.setDataSource(getApplicationContext(),sounds[currentSoundId]);
-                    buttonPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
         ImageView contactImage = (ImageView) findViewById(R.id.contactImage);
