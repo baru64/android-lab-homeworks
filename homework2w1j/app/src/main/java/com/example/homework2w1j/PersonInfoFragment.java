@@ -5,15 +5,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +28,7 @@ import java.util.Date;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class PersonInfoFragment extends Fragment implements View.OnClickListener {
+public class PersonInfoFragment extends Fragment {
 
     public static final int REQUEST_IMAGE_CAPTURE = 1; // request code for image capture
     private String mCurrentPhotoPath; // String used to save the path of the picture
@@ -39,7 +36,7 @@ public class PersonInfoFragment extends Fragment implements View.OnClickListener
 
     private File createImageFile() throws IOException{
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = mDisplayedPerson.title + timeStamp + "_";
+        String imageFileName = mDisplayedPerson.name + timeStamp + "_";
         File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,
@@ -54,17 +51,19 @@ public class PersonInfoFragment extends Fragment implements View.OnClickListener
         // Required empty public constructor
     }
 
-    public void displayTask(PersonListContent.Person person){
+    public void displayPerson(PersonListContent.Person person){
         FragmentActivity activity = getActivity();
 
         (activity.findViewById(R.id.displayFragment)).setVisibility(View.VISIBLE);
 
-        TextView taskInfoTitle = activity.findViewById(R.id.taskInfoTitle);
-        TextView taskInfoDescription = activity.findViewById(R.id.taskInfoDescription);
-        final ImageView taskInfoImage = activity.findViewById(R.id.taskInfoImage);
+        TextView personInfoName = activity.findViewById(R.id.personName);
+        TextView personInfoDescription = activity.findViewById(R.id.personDescription);
+        TextView personInfoBirthday = activity.findViewById(R.id.personBirthday);
+        final ImageView taskInfoImage = activity.findViewById(R.id.personInfoImage);
 
-        taskInfoTitle.setText(person.title);
-        taskInfoDescription.setText(person.details);
+        personInfoName.setText(person.name);
+        personInfoDescription.setText(person.description);
+        personInfoBirthday.setText(person.birthday);
         if(person.picPath != null && !person.picPath.isEmpty()){
             if(person.picPath.contains("drawable")){
                 Drawable taskDrawable;
@@ -108,7 +107,7 @@ public class PersonInfoFragment extends Fragment implements View.OnClickListener
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK){
             FragmentActivity holdingActivity = getActivity();
             if(holdingActivity != null){
-                ImageView taskImage = holdingActivity.findViewById(R.id.taskInfoImage);
+                ImageView taskImage = holdingActivity.findViewById(R.id.personInfoImage);
                 Bitmap cameraImage = PicUtils.decodePic(mCurrentPhotoPath,
                         taskImage.getWidth(),
                         taskImage.getHeight());
@@ -121,7 +120,7 @@ public class PersonInfoFragment extends Fragment implements View.OnClickListener
                     person.setPicPath(mCurrentPhotoPath);
                 }
                 if(holdingActivity instanceof MainActivity){
-                    ((PersonFragment)holdingActivity.getSupportFragmentManager().findFragmentById(R.id.taskFragment)).notifyDataChange();
+                    ((PersonFragment)holdingActivity.getSupportFragmentManager().findFragmentById(R.id.personFragment)).notifyDataChange();
 
                 }else if(holdingActivity instanceof PersonInfoActivity){
                     ((PersonInfoActivity)holdingActivity).setImgChanged(true);
@@ -136,13 +135,12 @@ public class PersonInfoFragment extends Fragment implements View.OnClickListener
         FragmentActivity activity = getActivity();
 
         activity.findViewById(R.id.displayFragment).setVisibility(View.INVISIBLE);
-        activity.findViewById(R.id.taskInfoImage).setOnClickListener(this);
 
         Intent intent = getActivity().getIntent();
         if(intent != null){
             PersonListContent.Person receivedPerson = intent.getParcelableExtra(MainActivity.taskExtra);
             if(receivedPerson != null){
-                displayTask(receivedPerson);
+                displayPerson(receivedPerson);
             }
         }
     }
@@ -154,25 +152,6 @@ public class PersonInfoFragment extends Fragment implements View.OnClickListener
         return inflater.inflate(R.layout.fragment_person_info, container, false);
     }
 
-    @Override
-    public void onClick(View v) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if(takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null){
-            File photoFile = null;
-            try{
-                photoFile = createImageFile();
-            }catch (IOException ex){
-
-            }
-            if(photoFile != null){
-                Uri photoURI = FileProvider.getUriForFile(getActivity(),
-                        getString(R.string.myFileprovider),
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,photoURI);
-                startActivityForResult(takePictureIntent,REQUEST_IMAGE_CAPTURE);
-            }
-        }
-    }
 
 }
 

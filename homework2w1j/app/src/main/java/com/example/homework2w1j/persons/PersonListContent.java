@@ -3,6 +3,8 @@ package com.example.homework2w1j.persons;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.example.homework2w1j.R;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +28,7 @@ public class PersonListContent {
      */
     public static final Map<String, Person> ITEM_MAP = new HashMap<String, Person>();
 
-    private static final int COUNT = 5;
+    private static final int COUNT = 3;
 
     static {
         // Add some sample items.
@@ -41,14 +43,15 @@ public class PersonListContent {
     }
 
     private static Person createDummyItem(int position) {
-        return new Person(String.valueOf(position), "Item " + position, makeDetails(position));
+        return new Person(String.valueOf(position), "Johnny Testowy " + position, makeDetails(position),
+                "2000-01-01", "drawable " + (position % 4));
     }
 
     private static String makeDetails(int position) {
         StringBuilder builder = new StringBuilder();
-        builder.append("Details about Item: ").append(position);
+        builder.append("Details about this person: ").append(position);
         for (int i = 0; i < position; i++) {
-            builder.append("\nMore details information here.");
+            builder.append("Aaa Bbb");
         }
         return builder.toString();
     }
@@ -70,28 +73,32 @@ public class PersonListContent {
      */
     public static class Person implements Parcelable {
         public final String id;
-        public final String title;
-        public final String details;
+        public final String name;
+        public final String description;
+        public final String birthday;
         public String picPath;
 
-        public Person(String id, String title, String details) {
+        public Person(String id, String name, String description, String birthday) {
             this.id = id;
-            this.title = title;
-            this.details = details;
+            this.name = name;
+            this.description = description;
+            this.birthday = birthday;
             this.picPath = "";
         }
 
-        public Person(String id, String title, String details, String picPath) {
+        public Person(String id, String name, String description, String birthday, String picPath) {
             this.id = id;
-            this.title = title;
-            this.details = details;
+            this.name = name;
+            this.description = description;
+            this.birthday = birthday;
             this.picPath = picPath;
         }
 
         protected Person(Parcel in) {
             id = in.readString();
-            title = in.readString();
-            details = in.readString();
+            name = in.readString();
+            description = in.readString();
+            birthday = in.readString();
             picPath = in.readString();
         }
 
@@ -113,7 +120,7 @@ public class PersonListContent {
 
         @Override
         public String toString() {
-            return title;
+            return name;
         }
 
         @Override
@@ -124,8 +131,9 @@ public class PersonListContent {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(id);
-            dest.writeString(title);
-            dest.writeString(details);
+            dest.writeString(name);
+            dest.writeString(description);
+            dest.writeString(birthday);
             dest.writeString(picPath);
         }
     }

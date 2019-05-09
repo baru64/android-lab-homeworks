@@ -41,7 +41,7 @@ public class MyPersonRecyclerViewAdapter extends RecyclerView.Adapter<MyPersonRe
     public void onBindViewHolder(final ViewHolder holder,final int position) {
         Person person = mValues.get(position);
         holder.mItem = person;
-        holder.mContentView.setText(person.title);
+        holder.mContentView.setText(person.name);
         final String picPath = person.picPath;
         Context context = holder.mView.getContext();
         if(picPath != null && !picPath.isEmpty()){
@@ -79,11 +79,10 @@ public class MyPersonRecyclerViewAdapter extends RecyclerView.Adapter<MyPersonRe
             }
         });
 
-        holder.mView.setOnLongClickListener(new View.OnLongClickListener(){
+        holder.mView.findViewById(R.id.deleteButton).setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v){
-                    mListener.onListFragmentLongClickInteraction(position);
-                    return false;
+            public void onClick(View v) {
+                mListener.onListFragmentDeleteInteraction(position);
             }
         });
     }

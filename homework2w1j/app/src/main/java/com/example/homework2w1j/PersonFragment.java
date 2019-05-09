@@ -101,6 +101,6 @@ public class PersonFragment extends Fragment {
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
         void onListFragmentClickInteraction(PersonListContent.Person person, int position);
-        void onListFragmentLongClickInteraction(int position);
+        void onListFragmentDeleteInteraction(int position);
     }
 }
