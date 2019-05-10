@@ -11,6 +11,17 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.homework2w1j.persons.PersonListContent;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
 
 import static com.example.homework2w1j.AddPersonActivity.BUTTON_REQUEST;
 
@@ -25,6 +36,14 @@ public class MainActivity extends AppCompatActivity
     private final String CURRENT_PERSON_KEY = "CurrentTask";
     public static final String takePhoto = "takePhoto";
 
+    private final String CHECKED_ID = "checkedId";
+    private final String PERSONS_JSON_FILE = "persons.json";
+    private final String NUM_PERSONS = "NumOfPersons";
+    private final String PERSON = "person_";
+    private final String BIRTHDAY = "birthday_";
+    private final String DETAIL = "desc_";
+    private final String PIC = "pic_";
+    private final String ID = "id_";
 
 
     @Override
@@ -51,6 +70,8 @@ public class MainActivity extends AppCompatActivity
                 openAddPersonCamActivity();
             }
         });
+
+        restorePersonsFromJson();
     }
 
     private void openAddPersonActivity() {
@@ -75,6 +96,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onDestroy() {
+        savePersonsToJson();
+        super.onDestroy();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (currentPerson != null)
             outState.putParcelable(CURRENT_PERSON_KEY, currentPerson);
@@ -87,40 +114,59 @@ public class MainActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-//    public void addClick(View view) {
-//        EditText taskTitleEditText = findViewById(R.id.taskTitle);
-//        EditText taskDescriptionEditText = findViewById(R.id.taskDescription);
-//        Spinner drawableSpinner = findViewById(R.id.drawableSpinner);
-//        String taskTitle = taskTitleEditText.getText().toString();
-//        String taskDescription = taskDescriptionEditText.getText().toString();
-//        String selectedImage = drawableSpinner.getSelectedItem().toString();
-//
-//        if(taskTitle.isEmpty() && taskDescription.isEmpty()){
-//            PersonListContent.addItem(new PersonListContent.Person("Person."+ PersonListContent.ITEMS.size()+1,
-//                    getString(R.string.default_name),
-//                    getString(R.string.default_description),
-//                    selectedImage));
-//        }else{
-//            if(taskTitle.isEmpty())
-//                taskTitle = getString(R.string.default_name);
-//            if(taskDescription.isEmpty())
-//                taskDescription = getString(R.string.default_description);
-//            PersonListContent.addItem(new PersonListContent.Person("Person."+ PersonListContent.ITEMS.size()+1,
-//                    taskTitle,
-//                    taskDescription,
-//                    selectedImage));
-//        }
-//
-//        ((PersonFragment) getSupportFragmentManager().findFragmentById(R.id.taskFragment)).notifyDataChange();
-//
-//        taskTitleEditText.setText("");
-//        taskDescriptionEditText.setText("");
-//
-//        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-//        imm.hideSoftInputFromWindow(view.getWindowToken(),0);
-//    }
-@Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    private void savePersonsToJson() {
+        Gson gson = new Gson();
+        String listJson = gson.toJson(PersonListContent.ITEMS);
+        FileOutputStream outputStream;
+        try {
+            outputStream = openFileOutput(PERSONS_JSON_FILE, MODE_PRIVATE);
+            FileWriter writer = new FileWriter(outputStream.getFD());
+            writer.write(listJson);
+            writer.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void restorePersonsFromJson() {
+        FileInputStream inputStream;
+        int DEFAULT_BUFFER_SIZE = 10000;
+        Gson gson = new Gson();
+        String readJson;
+
+        try {
+            inputStream = openFileInput(PERSONS_JSON_FILE);
+            FileReader reader = new FileReader(inputStream.getFD());
+            char[] buf = new char[DEFAULT_BUFFER_SIZE];
+            int n;
+            StringBuilder builder = new StringBuilder();
+            while ((n = reader.read(buf)) >= 0) {
+                String tmp = String.valueOf(buf);
+                String substring = (n<DEFAULT_BUFFER_SIZE ? tmp.substring(0, n) : tmp);
+                builder.append(substring);
+            }
+            reader.close();
+            readJson = builder.toString();
+            Type collectionType = new TypeToken<List<PersonListContent.Person>>() {
+            }.getType();
+            List<PersonListContent.Person> o = gson.fromJson(readJson, collectionType);
+            if (o != null) {
+                PersonListContent.clearList();
+                for(PersonListContent.Person person : o) {
+                    PersonListContent.addItem(person);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
     if(requestCode == 1){
         if(resultCode == RESULT_OK) {
