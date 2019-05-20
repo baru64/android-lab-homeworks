@@ -6,10 +6,12 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     tools:context=".MainActivity">
+
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1">
+
         <fragment
             android:id="@+id/personFragment"
             android:name="com.example.homework2w1j.PersonFragment"

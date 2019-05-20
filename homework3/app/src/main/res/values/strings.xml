@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">homework3</string>
+    <string name="ball">shake me</string>
+    <string name="shake_text">Shake to get an answer</string>
+</resources>
