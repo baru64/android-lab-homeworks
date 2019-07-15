@@ -20,7 +20,6 @@ public class MatchInfoActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed(){
-        setResult(RESULT_OK,new Intent().putExtra(DATA_CHANGED_KEY,imgChanged));
         super.onBackPressed();
     }
 }

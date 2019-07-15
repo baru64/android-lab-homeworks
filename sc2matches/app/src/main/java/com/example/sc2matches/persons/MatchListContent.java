@@ -3,6 +3,8 @@ package com.example.sc2matches.persons;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.example.sc2matches.MainActivity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,10 +31,9 @@ public class MatchListContent {
     private static final int COUNT = 3;
 
     static {
-        // Add some sample items.
-        for (int i = 1; i <= COUNT; i++) {
-            addItem(createDummyItem(i));
-        }
+//        for (int i = 1; i <= COUNT; i++) {
+//            addItem(createDummyItem(i));
+//        }
     }
 
     public static void addItem(Match item) {

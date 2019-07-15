@@ -16,7 +16,6 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.example.sc2matches.AddPersonActivity"></activity>
         <activity android:name="com.example.sc2matches.MatchInfoActivity" />
         <activity android:name="com.example.sc2matches.MainActivity">
             <intent-filter>

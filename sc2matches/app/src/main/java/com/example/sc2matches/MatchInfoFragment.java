@@ -97,8 +97,8 @@ public class MatchInfoFragment extends Fragment {
 
         player1Rating.setText("Rating:" + iPlayer1Rating);
         player2Rating.setText("Rating:" + iPlayer2Rating);
-        vsPlayer1Race.setText("vs " + match.p1_race + ": ");
-        vsPlayer2Race.setText("vs " + match.p2_race + ": " );
+        vsPlayer1Race.setText("vs " + match.p1_race + ":\n");
+        vsPlayer2Race.setText("vs " + match.p2_race + ":\n" );
 
 
         switch(match.p1_race) {
@@ -215,12 +215,17 @@ public class MatchInfoFragment extends Fragment {
                 JSONObject player1Form = responsePlayer1.getJSONObject("form");
                 JSONObject player2Form = responsePlayer2.getJSONObject("form");
 
-                vsPlayer2Race = player1Form.getJSONArray(player2Race).getInt(0) /
-                                (player1Form.getJSONArray(player2Race).getInt(0)
-                                + player1Form.getJSONArray(player2Race).getInt(1));
-                vsPlayer1Race = player2Form.getJSONArray(player1Race).getInt(0) /
-                        (player2Form.getJSONArray(player1Race).getInt(0)
-                                + player2Form.getJSONArray(player1Race).getInt(1));
+
+                JSONArray player1MatchesArray= player1Form.getJSONArray(player2Race);
+                int player1WonMatches = player1MatchesArray.getInt(0);
+                int player1LostMatches = player1MatchesArray.getInt(1);
+                vsPlayer2Race = Double.valueOf(player1WonMatches) /
+                        Double.valueOf(player1WonMatches + player1LostMatches);
+                JSONArray player2MatchesArray= player1Form.getJSONArray(player1Race);
+                int player2WonMatches = player2MatchesArray.getInt(0);
+                int player2LostMatches = player2MatchesArray.getInt(1);
+                vsPlayer1Race = Double.valueOf(player2WonMatches) /
+                        Double.valueOf(player2WonMatches + player2LostMatches);
 
                 player1Rating = (responsePlayer1.getJSONObject("current_rating")
                         .getDouble("rating")+1) * 1000.0;
@@ -245,10 +250,10 @@ public class MatchInfoFragment extends Fragment {
             TextView player2Rating = activity.findViewById(R.id.player2Rating);
             TextView vsPlayer1Race = activity.findViewById(R.id.vsPlayer1Race);
 
-            player1Rating.setText("Rating:" + ratings[0]);
-            player2Rating.setText("Rating:" + ratings[1]);
-            vsPlayer1Race.append(ratings[2].toString());
-            vsPlayer2Race.append(ratings[3].toString());
+            player1Rating.setText("Rating:\n" + ratings[0].intValue());
+            player2Rating.setText("Rating:\n" + ratings[1].intValue());
+            vsPlayer1Race.append((int)(ratings[2]*100)+"%");
+            vsPlayer2Race.append((int)(ratings[3]*100)+"%");
         }
     }
 }
