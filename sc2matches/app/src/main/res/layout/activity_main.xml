@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
         <fragment
-            android:id="@+id/personFragment"
+            android:id="@+id/matchFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_margin="8dp"
@@ -21,24 +21,24 @@
             tools:layout="@layout/fragment_match_list" />
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/addPersonButton"
+            android:id="@+id/getMoreButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:clickable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/refreshButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@android:drawable/ic_input_add" />
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/addPersonCamButton"
+            android:id="@+id/refreshButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="32dp"
             android:clickable="true"
-            app:layout_constraintBottom_toTopOf="@+id/addPersonButton"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_camera" />
+            app:srcCompat="@android:drawable/ic_menu_revert" />
 </android.support.constraint.ConstraintLayout>

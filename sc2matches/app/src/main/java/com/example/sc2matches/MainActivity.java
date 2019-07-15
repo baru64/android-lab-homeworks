@@ -2,26 +2,26 @@ package com.example.sc2matches;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.sc2matches.persons.MatchListContent;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.List;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import static com.example.sc2matches.AddPersonActivity.BUTTON_REQUEST;
 
@@ -54,32 +54,40 @@ public class MainActivity extends AppCompatActivity
             currentMatch = savedInstanceState.getParcelable(CURRENT_PERSON_KEY);
         }
 
-        FloatingActionButton addPersonButton = findViewById(R.id.addPersonButton);
-//        FloatingActionButton addPersonCamButton = findViewById(R.id.addPersonCamButton);
+        FloatingActionButton refreshButton = findViewById(R.id.refreshButton);
+        FloatingActionButton getMoreButton = findViewById(R.id.getMoreButton);
 
-        // TODO add -> refresh
-        addPersonButton.setOnClickListener(new View.OnClickListener() {
+        // refresh matches
+        refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openAddPersonActivity();
+                refreshList();
             }
         });
 
-        // TODO wywalić to
-//        addPersonCamButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                openAddPersonCamActivity();
-//            }
-//        });
+        // get more matches
+        getMoreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new GetMatchesTask().execute(8);
+                ((MatchFragment) getSupportFragmentManager().findFragmentById(R.id.matchFragment)).notifyDataChange();
+            }
+        });
 
 //        restorePersonsFromJson();
+        refreshList();
     }
 
-    private void openAddPersonActivity() {
-        Intent intent = new Intent(this, AddPersonActivity.class);
-        intent.putExtra(takePhoto, false);
-        startActivityForResult(intent, BUTTON_REQUEST);
+//    private void openAddPersonActivity() {
+//        Intent intent = new Intent(this, AddPersonActivity.class);
+//        intent.putExtra(takePhoto, false);
+//        startActivityForResult(intent, BUTTON_REQUEST);
+//    }
+
+    private void refreshList() {
+        MatchListContent.clearList();
+        new GetMatchesTask().execute(16);
+        ((MatchFragment) getSupportFragmentManager().findFragmentById(R.id.matchFragment)).notifyDataChange();
     }
 
     private void openAddPersonCamActivity() {
@@ -242,22 +250,121 @@ public class MainActivity extends AppCompatActivity
     public void onDialogPositiveClick(DialogFragment dialog) {
         if(currentItemPosition != -1 && currentItemPosition < MatchListContent.ITEMS.size()){
             MatchListContent.removeItem(currentItemPosition);
-            ((MatchFragment) getSupportFragmentManager().findFragmentById(R.id.personFragment)).notifyDataChange();
+            ((MatchFragment) getSupportFragmentManager().findFragmentById(R.id.matchFragment)).notifyDataChange();
         }
     }
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         View v = findViewById(R.id.addButton);
-//        if(v != null){
-//            Snackbar.make(v,getString(R.string.delete_cancel_msg),Snackbar.LENGTH_LONG)
-//                    .setAction(getString(R.string.retry_msg), new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            showDeleteDialog();
-//                        }
-//                    });
-//        }
+
 
     }
+
+    private class GetMatchesTask extends AsyncTask<Integer, Integer, Boolean> {
+        protected Boolean doInBackground(Integer... cnt) {
+            int count = cnt[0];
+            int offset = MatchListContent.ITEMS.size();
+            // get matches
+            String jsonString = "";
+            try {
+                URL url = new URL(
+                "http://aligulac.com/api/v1/match/?format=json&order_by=-date&offline=true"
+                        + "&limit=" + count + "&offset=" + offset
+                        + "&apikey=gmWATUigLKGlr5EfakDZ"
+                );
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+                try {
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder total = new StringBuilder();
+                    for (String line; (line = r.readLine()) != null; ) {
+                        total.append(line).append('\n');
+                    }
+                    jsonString = total.toString();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    urlConnection.disconnect();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            // read JSON
+            try {
+                JSONObject response = new JSONObject(jsonString);
+                JSONArray matches = response.getJSONArray("objects");
+                // TODO DOKOŃCZ to + jeśli już mamy pobrane rzeczy to offset +
+                // TODO do tego refresh ktory pod drugim przyciskiem wywala wszystko i na nowo 16 wciaga
+                // daj to do oncreate i na przyciski getmore i refresh
+                // + asynctask do brania statystyk gracza
+                int len = matches.length();
+                for(int i = 0; i < len; i++) {
+                    JSONObject m = matches.getJSONObject(i);
+                    Integer id = m.getInt("id");
+                    String score = m.getInt("sca") + " : " + m.getInt("scb");
+                    String date = m.getString("date");
+
+                    JSONObject p1 = m.getJSONObject("pla");
+                    JSONObject p2 = m.getJSONObject("plb");
+                    JSONObject eventObj = m.getJSONObject("eventobj");
+
+                    String event = eventObj.getString("fullname");
+                    String p1_name = p1.getString("tag");
+                    Integer p1_id = p1.getInt("id");
+                    String p1_race = p1.getString("race");
+                    String p2_name = p2.getString("tag");
+                    Integer p2_id = p2.getInt("id");
+                    String p2_race = p2.getString("race");
+
+                    switch (p1_race) {
+                        case "P":
+                            p1_race = "Protoss";
+                            break;
+                        case "Z":
+                            p1_race = "Zerg";
+                            break;
+                        case "T":
+                            p1_race = "Terran";
+                            break;
+                    }
+
+                    switch (p2_race) {
+                        case "P":
+                            p2_race = "Protoss";
+                            break;
+                        case "Z":
+                            p2_race = "Zerg";
+                            break;
+                        case "T":
+                            p2_race = "Terran";
+                            break;
+                    }
+
+                    MatchListContent.Match match = new MatchListContent.Match(
+                            "" + MatchListContent.ITEMS.size()+1, event, date,
+                            p1_name, p1_race, p1_id,
+                            p2_name, p2_race, p2_id,
+                            score);
+                    MatchListContent.addItem(match);
+                    publishProgress((int) ((i / (float) len) * 100));
+                    if (isCancelled()) break;
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+//            setProgressPercent(progress[0]);
+        }
+
+        protected void onPostExecute(Boolean result) {
+//            showDialog("Downloaded " + result + " bytes");
+        }
+    }
+
 }

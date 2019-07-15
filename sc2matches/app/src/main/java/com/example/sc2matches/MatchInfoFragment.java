@@ -2,11 +2,13 @@ package com.example.sc2matches;
 
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +17,19 @@ import android.widget.TextView;
 
 import com.example.sc2matches.persons.MatchListContent;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -75,16 +88,17 @@ public class MatchInfoFragment extends Fragment {
         player2Name.setText(match.p2_name);
 
         // get aligulac data
-        int iPlayer1Rating = 2750;
-        int iVsPlayer2Race = 60;
-        int iPlayer2Rating = 2550;
-        int iVsPlayer1Race = 50;
+
+        int iPlayer1Rating = 0;
+        int iPlayer2Rating = 0;
+        new GetStatsTask().execute(match.p1_id, match.p2_id);
+
         // ---
 
         player1Rating.setText("Rating:" + iPlayer1Rating);
         player2Rating.setText("Rating:" + iPlayer2Rating);
-        vsPlayer1Race.setText("vs " + match.p1_race + ": " + iVsPlayer1Race);
-        vsPlayer2Race.setText("vs " + match.p2_race + ": " + iVsPlayer2Race);
+        vsPlayer1Race.setText("vs " + match.p1_race + ": ");
+        vsPlayer2Race.setText("vs " + match.p2_race + ": " );
 
 
         switch(match.p1_race) {
@@ -114,6 +128,9 @@ public class MatchInfoFragment extends Fragment {
         mDisplayedMatch = match;
     }
 
+    private void setStats() {
+        // TODO
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
@@ -166,6 +183,73 @@ public class MatchInfoFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_match_info, container, false);
     }
 
+    private class GetStatsTask extends AsyncTask<Integer, Integer, Double[]> {
+        protected Double[] doInBackground(Integer... ids) {
 
+            HttpHandler sh = new HttpHandler();
+            String url1 = "http://aligulac.com/api/v1/player/"
+                    + ids[0]
+                    +"/?format=json&apikey=gmWATUigLKGlr5EfakDZ";
+            String url2 = "http://aligulac.com/api/v1/player/"
+                    + ids[1]
+                    +"/?format=json&apikey=gmWATUigLKGlr5EfakDZ";
+            String jsonStringP1 = sh.makeServiceCall(url1);
+            Log.e("Match Stats", "Response from url: " + jsonStringP1);
+            String jsonStringP2 = sh.makeServiceCall(url2);
+            Log.e("Match Stats", "Response from url: " + jsonStringP2);
+
+            // read JSON
+            double player1Rating = 0.0;
+            double player2Rating = 0.0;
+            double vsPlayer1Race = 0.0;
+            double vsPlayer2Race = 0.0;
+            String player1Race;
+            String player2Race;
+            try {
+                JSONObject responsePlayer1 = new JSONObject(jsonStringP1);
+                JSONObject responsePlayer2 = new JSONObject(jsonStringP2);
+
+                player1Race = responsePlayer1.getString("race");
+                player2Race = responsePlayer2.getString("race");
+
+                JSONObject player1Form = responsePlayer1.getJSONObject("form");
+                JSONObject player2Form = responsePlayer2.getJSONObject("form");
+
+                vsPlayer2Race = player1Form.getJSONArray(player2Race).getInt(0) /
+                                (player1Form.getJSONArray(player2Race).getInt(0)
+                                + player1Form.getJSONArray(player2Race).getInt(1));
+                vsPlayer1Race = player2Form.getJSONArray(player1Race).getInt(0) /
+                        (player2Form.getJSONArray(player1Race).getInt(0)
+                                + player2Form.getJSONArray(player1Race).getInt(1));
+
+                player1Rating = (responsePlayer1.getJSONObject("current_rating")
+                        .getDouble("rating")+1) * 1000.0;
+                player2Rating = (responsePlayer2.getJSONObject("current_rating")
+                        .getDouble("rating")+1) * 1000.0;
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Double[] ret = {player1Rating, player2Rating, vsPlayer1Race, vsPlayer2Race};
+            return ret;
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+//            setProgressPercent(progress[0]);
+        }
+
+        protected void onPostExecute(Double[] ratings) {
+            FragmentActivity activity = getActivity();
+            TextView player1Rating = activity.findViewById(R.id.player1Rating);
+            TextView vsPlayer2Race = activity.findViewById(R.id.vsPlayer2Race);
+            TextView player2Rating = activity.findViewById(R.id.player2Rating);
+            TextView vsPlayer1Race = activity.findViewById(R.id.vsPlayer1Race);
+
+            player1Rating.setText("Rating:" + ratings[0]);
+            player2Rating.setText("Rating:" + ratings[1]);
+            vsPlayer1Race.append(ratings[2].toString());
+            vsPlayer2Race.append(ratings[3].toString());
+        }
+    }
 }
 

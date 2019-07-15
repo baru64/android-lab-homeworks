@@ -48,10 +48,10 @@ public class MyMatchRecyclerViewAdapter extends RecyclerView.Adapter<MyMatchRecy
                 holder.p1raceView.setImageResource(R.drawable.zicon_small);
                 break;
             case "Protoss":
-                holder.p1raceView.setImageResource(R.drawable.ticon_small);
+                holder.p1raceView.setImageResource(R.drawable.picon_small);
                 break;
             case "Terran":
-                holder.p1raceView.setImageResource(R.drawable.picon_small);
+                holder.p1raceView.setImageResource(R.drawable.ticon_small);
                 break;
         }
         switch(match.p2_race) {
@@ -59,10 +59,10 @@ public class MyMatchRecyclerViewAdapter extends RecyclerView.Adapter<MyMatchRecy
                 holder.p2raceView.setImageResource(R.drawable.zicon_small);
                 break;
             case "Protoss":
-                holder.p2raceView.setImageResource(R.drawable.ticon_small);
+                holder.p2raceView.setImageResource(R.drawable.picon_small);
                 break;
             case "Terran":
-                holder.p2raceView.setImageResource(R.drawable.picon_small);
+                holder.p2raceView.setImageResource(R.drawable.ticon_small);
                 break;
         }
 
