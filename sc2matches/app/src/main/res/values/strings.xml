@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">sc2matches</string>
+    <string name="app_name">SC2 Matches</string>
     <string name="person_name">Name</string>
     <string name="person_description">Description</string>
     <string name="add_person">Add</string>
