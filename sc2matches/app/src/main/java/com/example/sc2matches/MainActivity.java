@@ -5,12 +5,12 @@ import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 
-import com.example.sc2matches.persons.MatchListContent;
+import com.example.sc2matches.matches.MatchListContent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity
     private int currentItemPosition = -1;
     private MatchListContent.Match currentMatch;
     private final String CURRENT_PERSON_KEY = "CurrentTask";
+    private ProgressBar progressBar;
 
 
     @Override
@@ -44,6 +45,9 @@ public class MainActivity extends AppCompatActivity
 
         FloatingActionButton refreshButton = findViewById(R.id.refreshButton);
         FloatingActionButton getMoreButton = findViewById(R.id.getMoreButton);
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
+        progressBar.setMax(100);
 
         // refresh matches
         refreshButton.setOnClickListener(new View.OnClickListener() {
@@ -59,19 +63,19 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Log.d("Main", "get more button clicked");
-                new GetMatchesTask().execute(8);
+                new GetMatchesTask(progressBar).execute(8);
 //                ((MatchFragment) getSupportFragmentManager().findFragmentById(R.id.matchFragment)).notifyDataChange();
             }
         });
 
-        new GetMatchesTask().execute(16);
+        new GetMatchesTask(progressBar).execute(16);
 
     }
 
 
     public void refreshList() {
         MatchListContent.clearList();
-        new GetMatchesTask().execute(16);
+        new GetMatchesTask(progressBar).execute(16);
 //        ((MatchFragment) getSupportFragmentManager().findFragmentById(R.id.matchFragment)).notifyDataChange();
     }
 
@@ -135,9 +139,23 @@ public class MainActivity extends AppCompatActivity
 
 
     private class GetMatchesTask extends AsyncTask<Integer, Integer, Boolean> {
+        private ProgressBar progressBar;
+
+        GetMatchesTask(ProgressBar progressBar) {
+            this.progressBar = progressBar;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+            progressBar.setProgress(0);
+        }
+
+        @Override
         protected Boolean doInBackground(Integer... cnt) {
             int count = cnt[0];
             int offset = MatchListContent.ITEMS.size();
+
             // get matches
             String jsonString = "";
             try {
@@ -164,6 +182,7 @@ public class MainActivity extends AppCompatActivity
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            publishProgress(10);
             // read JSON
             try {
                 JSONObject response = new JSONObject(jsonString);
@@ -218,7 +237,7 @@ public class MainActivity extends AppCompatActivity
                             p2_name, p2_race, p2_id,
                             score);
                     MatchListContent.addItem(match);
-                    publishProgress((int) ((i / (float) len) * 100));
+                    publishProgress((int) ((i / (float) len) * 90));
                     if (isCancelled()) break;
                 }
 
@@ -228,11 +247,15 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
 
+        @Override
         protected void onProgressUpdate(Integer... progress) {
-//            setProgressPercent(progress[0]);
+            ProgressBar progressBar = findViewById(R.id.progressBar);
+            progressBar.setProgress(progress[0]);
         }
 
+        @Override
         protected void onPostExecute(Boolean result) {
+            progressBar.setVisibility(View.GONE);
             ((MatchFragment) getSupportFragmentManager().findFragmentById(R.id.matchFragment)).notifyDataChange();
         }
     }

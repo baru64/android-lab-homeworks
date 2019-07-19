@@ -1,5 +1,6 @@
 package com.example.sc2matches;
 
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.sc2matches.MatchFragment.OnListFragmentInteractionListener;
-import com.example.sc2matches.persons.MatchListContent;
+import com.example.sc2matches.matches.MatchListContent;
 
 import java.util.List;
 
@@ -46,23 +47,30 @@ public class MyMatchRecyclerViewAdapter extends RecyclerView.Adapter<MyMatchRecy
         switch(match.p1_race) {
             case "Zerg":
                 holder.p1raceView.setImageResource(R.drawable.zicon_small);
+                holder.p1View.setTextColor(Color.rgb(200,0,0));
                 break;
             case "Protoss":
                 holder.p1raceView.setImageResource(R.drawable.picon_small);
+                holder.p1View.setTextColor(Color.rgb(0,180,0));
+
                 break;
             case "Terran":
                 holder.p1raceView.setImageResource(R.drawable.ticon_small);
+                holder.p1View.setTextColor(Color.rgb(0,0,200));
                 break;
         }
         switch(match.p2_race) {
             case "Zerg":
                 holder.p2raceView.setImageResource(R.drawable.zicon_small);
+                holder.p2View.setTextColor(Color.rgb(200,0,0));
                 break;
             case "Protoss":
                 holder.p2raceView.setImageResource(R.drawable.picon_small);
+                holder.p2View.setTextColor(Color.rgb(0,180,0));
                 break;
             case "Terran":
                 holder.p2raceView.setImageResource(R.drawable.ticon_small);
+                holder.p2View.setTextColor(Color.rgb(0,0,200));
                 break;
         }
 

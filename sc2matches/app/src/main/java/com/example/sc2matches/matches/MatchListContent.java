@@ -1,9 +1,7 @@
-package com.example.sc2matches.persons;
+package com.example.sc2matches.matches;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.example.sc2matches.MainActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;

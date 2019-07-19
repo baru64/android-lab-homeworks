@@ -12,7 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.sc2matches.persons.MatchListContent;
+import com.example.sc2matches.matches.MatchListContent;
 
 /**
  * A fragment representing a list of Items.
@@ -88,16 +88,6 @@ public class MatchFragment extends Fragment {
         mRecyclerViewAdapter.notifyDataSetChanged();
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and event
         void onListFragmentClickInteraction(MatchListContent.Match match, int position);

@@ -2,34 +2,28 @@ package com.example.sc2matches;
 
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.sc2matches.persons.MatchListContent;
+import com.example.sc2matches.matches.MatchListContent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Array;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -39,30 +33,20 @@ import java.util.Date;
  */
 public class MatchInfoFragment extends Fragment {
 
-    public static final int REQUEST_IMAGE_CAPTURE = 1; // request code for image capture
-    private String mCurrentPhotoPath; // String used to save the path of the picture
     private MatchListContent.Match mDisplayedMatch;
+    private ProgressBar progressBar;
 
-    private File createImageFile() throws IOException{
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = mDisplayedMatch.event + timeStamp + "_";
-        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,
-                ".jpg",
-                storageDir
-        );
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
 
     public MatchInfoFragment() {
         // Required empty public constructor
+
     }
 
-    // TODO display statystyki meczu
     public void displayMatch(MatchListContent.Match match){
         FragmentActivity activity = getActivity();
+        progressBar = activity.findViewById(R.id.progressBar2);
+        progressBar.setVisibility(View.INVISIBLE);
+        progressBar.setMax(100);
 
         (activity.findViewById(R.id.displayFragment)).setVisibility(View.VISIBLE);
 
@@ -91,7 +75,7 @@ public class MatchInfoFragment extends Fragment {
 
         int iPlayer1Rating = 0;
         int iPlayer2Rating = 0;
-        new GetStatsTask().execute(match.p1_id, match.p2_id);
+        new GetStatsTask(progressBar).execute(match.p1_id, match.p2_id);
 
         // ---
 
@@ -104,24 +88,30 @@ public class MatchInfoFragment extends Fragment {
         switch(match.p1_race) {
             case "Zerg":
                 player1Race.setImageResource(R.drawable.zicon_small);
+                player1Name.setTextColor(Color.rgb(200,0,0));
                 break;
             case "Protoss":
-                player1Race.setImageResource(R.drawable.ticon_small);
+                player1Race.setImageResource(R.drawable.picon_small);
+                player1Name.setTextColor(Color.rgb(0,180,0));
                 break;
             case "Terran":
-                player1Race.setImageResource(R.drawable.picon_small);
+                player1Race.setImageResource(R.drawable.ticon_small);
+                player1Name.setTextColor(Color.rgb(0,0,200));
                 break;
         }
 
         switch(match.p2_race) {
             case "Zerg":
                 player2Race.setImageResource(R.drawable.zicon_small);
+                player2Name.setTextColor(Color.rgb(200,0,0));
                 break;
             case "Protoss":
-                player2Race.setImageResource(R.drawable.ticon_small);
+                player2Race.setImageResource(R.drawable.picon_small);
+                player2Name.setTextColor(Color.rgb(0,180,0));
                 break;
             case "Terran":
-                player2Race.setImageResource(R.drawable.picon_small);
+                player2Race.setImageResource(R.drawable.ticon_small);
+                player2Name.setTextColor(Color.rgb(0,0,200));
                 break;
         }
 
@@ -134,29 +124,6 @@ public class MatchInfoFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-//        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK){
-//            FragmentActivity holdingActivity = getActivity();
-//            if(holdingActivity != null){
-//                ImageView taskImage = holdingActivity.findViewById(R.id.player1Race);
-//                Bitmap cameraImage = PicUtils.decodePic(mCurrentPhotoPath,
-//                        taskImage.getWidth(),
-//                        taskImage.getHeight());
-//
-//                taskImage.setImageBitmap(cameraImage);
-//                mDisplayedMatch.setPicPath(mCurrentPhotoPath);
-//
-//                MatchListContent.Match match = MatchListContent.ITEM_MAP.get(mDisplayedMatch.id);
-//                if(match !=null){
-//                    match.setPicPath(mCurrentPhotoPath);
-//                }
-//                if(holdingActivity instanceof MainActivity){
-//                    ((MatchFragment)holdingActivity.getSupportFragmentManager().findFragmentById(R.id.personFragment)).notifyDataChange();
-//
-//                }else if(holdingActivity instanceof MatchInfoActivity){
-//                    ((MatchInfoActivity)holdingActivity).setImgChanged(true);
-//                }
-//            }
-//        }
     }
 
     @Override
@@ -184,7 +151,25 @@ public class MatchInfoFragment extends Fragment {
     }
 
     private class GetStatsTask extends AsyncTask<Integer, Integer, MatchDetails> {
+        private ProgressBar progressBar;
+
+        GetStatsTask(ProgressBar progressBar) {
+            this.progressBar = progressBar;
+            if(progressBar == null) {
+                FragmentActivity activity = getActivity();
+                this.progressBar = activity.findViewById(R.id.progressBar2);
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+            progressBar.setProgress(0);
+        }
+
+        @Override
         protected MatchDetails doInBackground(Integer... ids) {
+            publishProgress(10);
 
             HttpHandler sh = new HttpHandler();
             String url1 = "http://aligulac.com/api/v1/player/"
@@ -193,10 +178,12 @@ public class MatchInfoFragment extends Fragment {
             String url2 = "http://aligulac.com/api/v1/player/"
                     + ids[1]
                     +"/?format=json&apikey=gmWATUigLKGlr5EfakDZ";
+
             String jsonStringP1 = sh.makeServiceCall(url1);
-            Log.e("Match Stats", "Response from url: " + jsonStringP1);
+//            Log.e("Match Stats", "Response from url: " + jsonStringP1);
             String jsonStringP2 = sh.makeServiceCall(url2);
-            Log.e("Match Stats", "Response from url: " + jsonStringP2);
+//            Log.e("Match Stats", "Response from url: " + jsonStringP2);
+            publishProgress(35);
 
             // read JSON
             double player1Rating = 0.0;
@@ -219,7 +206,7 @@ public class MatchInfoFragment extends Fragment {
 
                 JSONObject player1Form = responsePlayer1.getJSONObject("form");
                 JSONObject player2Form = responsePlayer2.getJSONObject("form");
-
+                publishProgress(25);
 
                 JSONArray player1MatchesArray= player1Form.getJSONArray(player2Race);
                 int player1WonMatches = player1MatchesArray.getInt(0);
@@ -241,6 +228,7 @@ public class MatchInfoFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            publishProgress(30);
             MatchDetails matchDetails = new MatchDetails();
             matchDetails.player1Rating = player1Rating;
             matchDetails.player2Rating = player2Rating;
@@ -251,10 +239,12 @@ public class MatchInfoFragment extends Fragment {
             return matchDetails;
         }
 
+        @Override
         protected void onProgressUpdate(Integer... progress) {
-//            setProgressPercent(progress[0]);
+            progressBar.incrementProgressBy(progress[0]);
         }
 
+        @Override
         protected void onPostExecute(MatchDetails matchDetails) {
             FragmentActivity activity = getActivity();
             TextView player1Rating = activity.findViewById(R.id.player1Rating);
@@ -270,6 +260,7 @@ public class MatchInfoFragment extends Fragment {
             vsPlayer2Race.append((int)(matchDetails.vsPlayer2Race*100)+"%");
             player1Country.setText("Country:\n" + matchDetails.player1Country);
             player2Country.setText("Country:\n" + matchDetails.player2Country);
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
