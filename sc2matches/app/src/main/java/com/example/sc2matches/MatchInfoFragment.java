@@ -183,8 +183,8 @@ public class MatchInfoFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_match_info, container, false);
     }
 
-    private class GetStatsTask extends AsyncTask<Integer, Integer, Double[]> {
-        protected Double[] doInBackground(Integer... ids) {
+    private class GetStatsTask extends AsyncTask<Integer, Integer, MatchDetails> {
+        protected MatchDetails doInBackground(Integer... ids) {
 
             HttpHandler sh = new HttpHandler();
             String url1 = "http://aligulac.com/api/v1/player/"
@@ -205,12 +205,17 @@ public class MatchInfoFragment extends Fragment {
             double vsPlayer2Race = 0.0;
             String player1Race;
             String player2Race;
+            String player1Country = "";
+            String player2Country = "";
             try {
                 JSONObject responsePlayer1 = new JSONObject(jsonStringP1);
                 JSONObject responsePlayer2 = new JSONObject(jsonStringP2);
 
                 player1Race = responsePlayer1.getString("race");
                 player2Race = responsePlayer2.getString("race");
+                player1Country = responsePlayer1.getString("country");
+                player2Country = responsePlayer2.getString("country");
+
 
                 JSONObject player1Form = responsePlayer1.getJSONObject("form");
                 JSONObject player2Form = responsePlayer2.getJSONObject("form");
@@ -220,12 +225,13 @@ public class MatchInfoFragment extends Fragment {
                 int player1WonMatches = player1MatchesArray.getInt(0);
                 int player1LostMatches = player1MatchesArray.getInt(1);
                 vsPlayer2Race = Double.valueOf(player1WonMatches) /
-                        Double.valueOf(player1WonMatches + player1LostMatches);
-                JSONArray player2MatchesArray= player1Form.getJSONArray(player1Race);
+                                Double.valueOf(player1WonMatches + player1LostMatches);
+
+                JSONArray player2MatchesArray= player2Form.getJSONArray(player1Race);
                 int player2WonMatches = player2MatchesArray.getInt(0);
                 int player2LostMatches = player2MatchesArray.getInt(1);
                 vsPlayer1Race = Double.valueOf(player2WonMatches) /
-                        Double.valueOf(player2WonMatches + player2LostMatches);
+                                Double.valueOf(player2WonMatches + player2LostMatches);
 
                 player1Rating = (responsePlayer1.getJSONObject("current_rating")
                         .getDouble("rating")+1) * 1000.0;
@@ -235,25 +241,56 @@ public class MatchInfoFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Double[] ret = {player1Rating, player2Rating, vsPlayer1Race, vsPlayer2Race};
-            return ret;
+            MatchDetails matchDetails = new MatchDetails();
+            matchDetails.player1Rating = player1Rating;
+            matchDetails.player2Rating = player2Rating;
+            matchDetails.vsPlayer1Race = vsPlayer1Race;
+            matchDetails.vsPlayer2Race = vsPlayer2Race;
+            matchDetails.player1Country = player1Country;
+            matchDetails.player2Country = player2Country;
+            return matchDetails;
         }
 
         protected void onProgressUpdate(Integer... progress) {
 //            setProgressPercent(progress[0]);
         }
 
-        protected void onPostExecute(Double[] ratings) {
+        protected void onPostExecute(MatchDetails matchDetails) {
             FragmentActivity activity = getActivity();
             TextView player1Rating = activity.findViewById(R.id.player1Rating);
             TextView vsPlayer2Race = activity.findViewById(R.id.vsPlayer2Race);
             TextView player2Rating = activity.findViewById(R.id.player2Rating);
             TextView vsPlayer1Race = activity.findViewById(R.id.vsPlayer1Race);
+            TextView player1Country = activity.findViewById(R.id.player1Country);
+            TextView player2Country = activity.findViewById(R.id.player2Country);
 
-            player1Rating.setText("Rating:\n" + ratings[0].intValue());
-            player2Rating.setText("Rating:\n" + ratings[1].intValue());
-            vsPlayer1Race.append((int)(ratings[2]*100)+"%");
-            vsPlayer2Race.append((int)(ratings[3]*100)+"%");
+            player1Rating.setText("Rating:\n" + matchDetails.player1Rating.intValue());
+            player2Rating.setText("Rating:\n" + matchDetails.player2Rating.intValue());
+            vsPlayer1Race.append((int)(matchDetails.vsPlayer1Race*100)+"%");
+            vsPlayer2Race.append((int)(matchDetails.vsPlayer2Race*100)+"%");
+            player1Country.setText("Country:\n" + matchDetails.player1Country);
+            player2Country.setText("Country:\n" + matchDetails.player2Country);
+        }
+    }
+
+    private class MatchDetails {
+        public Double player1Rating;
+        public Double player2Rating;
+        public Double vsPlayer1Race;
+        public Double vsPlayer2Race;
+        public String player1Country;
+        public String player2Country;
+        MatchDetails(Double p1rating,Double p2rating,Double vsP1race,Double vsP2race,
+                     String p1country,String p2country) {
+            player1Rating = p1rating;
+            player2Rating = p2rating;
+            vsPlayer1Race = vsP1race;
+            vsPlayer2Race = vsP2race;
+            player1Country = p1country;
+            player2Country = p2country;
+        }
+        MatchDetails() {
+
         }
     }
 }
