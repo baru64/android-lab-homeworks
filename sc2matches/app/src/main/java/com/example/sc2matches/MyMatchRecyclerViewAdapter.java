@@ -58,6 +58,9 @@ public class MyMatchRecyclerViewAdapter extends RecyclerView.Adapter<MyMatchRecy
                 holder.p1raceView.setImageResource(R.drawable.ticon_small);
                 holder.p1View.setTextColor(Color.rgb(0,0,200));
                 break;
+            case "Random":
+                holder.p1raceView.setImageResource(R.drawable.ricon_small);
+                holder.p1View.setTextColor(Color.rgb(220,150,0));
         }
         switch(match.p2_race) {
             case "Zerg":
@@ -72,6 +75,9 @@ public class MyMatchRecyclerViewAdapter extends RecyclerView.Adapter<MyMatchRecy
                 holder.p2raceView.setImageResource(R.drawable.ticon_small);
                 holder.p2View.setTextColor(Color.rgb(0,0,200));
                 break;
+            case "Random":
+                holder.p2raceView.setImageResource(R.drawable.ricon_small);
+                holder.p2View.setTextColor(Color.rgb(220,150,0));
         }
 
         holder.mView.setOnClickListener(new View.OnClickListener(){

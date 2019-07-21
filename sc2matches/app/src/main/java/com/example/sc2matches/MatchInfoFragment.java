@@ -98,6 +98,9 @@ public class MatchInfoFragment extends Fragment {
                 player1Race.setImageResource(R.drawable.ticon_small);
                 player1Name.setTextColor(Color.rgb(0,0,200));
                 break;
+            case "Random":
+                player1Race.setImageResource(R.drawable.ricon_small);
+                player1Name.setTextColor(Color.rgb(220,150,0));
         }
 
         switch(match.p2_race) {
@@ -113,13 +116,12 @@ public class MatchInfoFragment extends Fragment {
                 player2Race.setImageResource(R.drawable.ticon_small);
                 player2Name.setTextColor(Color.rgb(0,0,200));
                 break;
+            case "Random":
+                player2Race.setImageResource(R.drawable.ricon_small);
+                player2Name.setTextColor(Color.rgb(220,150,0));
         }
 
         mDisplayedMatch = match;
-    }
-
-    private void setStats() {
-        // TODO
     }
 
     @Override
@@ -134,7 +136,6 @@ public class MatchInfoFragment extends Fragment {
         activity.findViewById(R.id.displayFragment).setVisibility(View.INVISIBLE);
 
         Intent intent = getActivity().getIntent();
-        // TODO jak nie ma intentu, my mamy intent tutaj gdy chcemy refresh uzywac, w innym wypadku statystyki
         if(intent != null){
             MatchListContent.Match receivedMatch = intent.getParcelableExtra(MainActivity.taskExtra);
             if(receivedMatch != null){
@@ -254,12 +255,12 @@ public class MatchInfoFragment extends Fragment {
             TextView player1Country = activity.findViewById(R.id.player1Country);
             TextView player2Country = activity.findViewById(R.id.player2Country);
 
-            player1Rating.setText("Rating:\n" + matchDetails.player1Rating.intValue());
-            player2Rating.setText("Rating:\n" + matchDetails.player2Rating.intValue());
+            player1Rating.setText("" + matchDetails.player1Rating.intValue());
+            player2Rating.setText("" + matchDetails.player2Rating.intValue());
             vsPlayer1Race.append((int)(matchDetails.vsPlayer1Race*100)+"%");
             vsPlayer2Race.append((int)(matchDetails.vsPlayer2Race*100)+"%");
-            player1Country.setText("Country:\n" + matchDetails.player1Country);
-            player2Country.setText("Country:\n" + matchDetails.player2Country);
+            player1Country.setText("" + matchDetails.player1Country);
+            player2Country.setText("" + matchDetails.player2Country);
             progressBar.setVisibility(View.INVISIBLE);
         }
     }

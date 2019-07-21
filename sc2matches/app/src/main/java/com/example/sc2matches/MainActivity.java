@@ -6,7 +6,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.ActionMenuItem;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -34,6 +38,24 @@ public class MainActivity extends AppCompatActivity
     private final String CURRENT_PERSON_KEY = "CurrentTask";
     private ProgressBar progressBar;
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId())
+        {
+            case R.id.showMatches:
+                break;
+            case R.id.showTop:
+                showTopPlayers();
+                break;
+        }
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +64,10 @@ public class MainActivity extends AppCompatActivity
         if (savedInstanceState != null) {
             currentMatch = savedInstanceState.getParcelable(CURRENT_PERSON_KEY);
         }
+//
+//        Toolbar myToolbar = findViewById(R.id.my_toolbar);
+//        setSupportActionBar(myToolbar);
+
 
         FloatingActionButton refreshButton = findViewById(R.id.refreshButton);
         FloatingActionButton getMoreButton = findViewById(R.id.getMoreButton);
@@ -84,7 +110,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
             if(currentMatch != null)
-                displayTaskInFragment(currentMatch);
+                displayMatchInFragment(currentMatch);
         }
     }
 
@@ -101,12 +127,16 @@ public class MainActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
     }
 
-        private void startSecondActivity(MatchListContent.Match match, int position){
+    private void startSecondActivity(MatchListContent.Match match, int position){
         Intent intent = new Intent(this, MatchInfoActivity.class);
         intent.putExtra(taskExtra, match);
         startActivity(intent);
     }
 
+    private void showTopPlayers() {
+        Intent intent = new Intent(this, TopPlayerActivity.class);
+        startActivity(intent);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -114,7 +144,7 @@ public class MainActivity extends AppCompatActivity
 }
 
 
-    private void displayTaskInFragment(MatchListContent.Match match){
+    private void displayMatchInFragment(MatchListContent.Match match){
         MatchInfoFragment matchInfoFragment = ((MatchInfoFragment) getSupportFragmentManager().findFragmentById(R.id.displayFragment));
         if(match != null){
             matchInfoFragment.displayMatch(match);
@@ -126,7 +156,7 @@ public class MainActivity extends AppCompatActivity
     public void onListFragmentClickInteraction(MatchListContent.Match match, int position) {
         currentMatch = match;
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
-            displayTaskInFragment(match);
+            displayMatchInFragment(match);
         }else {
             startSecondActivity(match, position);
         }
@@ -158,30 +188,35 @@ public class MainActivity extends AppCompatActivity
 
             // get matches
             String jsonString = "";
-            try {
-                URL url = new URL(
-                "http://aligulac.com/api/v1/match/?format=json&order_by=-date&offline=true"
+//            try {
+//                URL url = new URL(
+//                "http://aligulac.com/api/v1/match/?format=json&order_by=-date&offline=true"
+//                        + "&limit=" + count + "&offset=" + offset
+//                        + "&apikey=gmWATUigLKGlr5EfakDZ"
+//                );
+//                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+//
+//                try {
+//                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+//                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+//                    StringBuilder total = new StringBuilder();
+//                    for (String line; (line = r.readLine()) != null; ) {
+//                        total.append(line).append('\n');
+//                    }
+//                    jsonString = total.toString();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } finally {
+//                    urlConnection.disconnect();
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            HttpHandler sh = new HttpHandler();
+            String url = "http://aligulac.com/api/v1/match/?format=json&order_by=-date&offline=true"
                         + "&limit=" + count + "&offset=" + offset
-                        + "&apikey=gmWATUigLKGlr5EfakDZ"
-                );
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-                try {
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                    StringBuilder total = new StringBuilder();
-                    for (String line; (line = r.readLine()) != null; ) {
-                        total.append(line).append('\n');
-                    }
-                    jsonString = total.toString();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    urlConnection.disconnect();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                        + "&apikey=gmWATUigLKGlr5EfakDZ";
+            jsonString = sh.makeServiceCall(url);
             publishProgress(10);
             // read JSON
             try {
@@ -217,6 +252,8 @@ public class MainActivity extends AppCompatActivity
                         case "T":
                             p1_race = "Terran";
                             break;
+                        case "R":
+                            p1_race = "Random";
                     }
 
                     switch (p2_race) {
@@ -229,6 +266,8 @@ public class MainActivity extends AppCompatActivity
                         case "T":
                             p2_race = "Terran";
                             break;
+                        case "R":
+                            p2_race = "Random";
                     }
 
                     MatchListContent.Match match = new MatchListContent.Match(

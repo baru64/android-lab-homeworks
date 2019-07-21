@@ -9,11 +9,11 @@
 
         <fragment
             android:id="@+id/matchFragment"
-            android:layout_width="match_parent"
+            android:name="com.example.sc2matches.MatchFragment"
+            android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="8dp"
             android:layout_marginBottom="8dp"
-            android:name="com.example.sc2matches.MatchFragment"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -56,5 +56,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/matchFragment" />
+
 
 </android.support.constraint.ConstraintLayout>
